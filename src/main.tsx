@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import App from './App';
 
-const manifestUrl = 'https://twa-template-tan.vercel.app/tonconnect-manifest.json';
+// Используем прямую ссылку на файл в твоем репозитории GitHub
+const manifestUrl = 'https://raw.githubusercontent.com/Slavaflagman/twa-template/main/public/tonconnect-manifest.json';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
