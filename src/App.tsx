@@ -25,9 +25,13 @@ export default function App() {
   const [cartCount, setCartCount] = useState(0);
   const [likes, setLikes] = useState<Record<string, boolean>>({});
 
-  // Модалка выставления своего товара
+  // Динамический список лотов (начинаем с пустого)
+  const [items, setItems] = useState<GiftItem[]>([]);
+
+  // Модалка выставления товара
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newNumber, setNewNumber] = useState('');
   const [newPrice, setNewPrice] = useState('');
 
   useEffect(() => {
@@ -36,69 +40,6 @@ export default function App() {
       window.Telegram.WebApp.expand();
     }
   }, []);
-
-  const [items, setItems] = useState<GiftItem[]>([
-    {
-      id: '1',
-      name: 'Crystal Ball',
-      number: '#17867',
-      priceStars: 500,
-      bgGradient: 'linear-gradient(135deg, #e57373 0%, #ba68c8 100%)',
-      image: 'https://api.iconify.design/fluent-emoji:crystal-ball.svg',
-      category: 'market',
-      seller: 'User123'
-    },
-    {
-      id: '2',
-      name: 'Heart Locket',
-      number: '#1700',
-      priceStars: 2500,
-      bgGradient: 'linear-gradient(135deg, #81c784 0%, #4db6ac 100%)',
-      image: 'https://api.iconify.design/fluent-emoji:gem-stone.svg',
-      category: 'market',
-      seller: 'CryptoTrader'
-    },
-    {
-      id: '3',
-      name: 'Golden Surfboard',
-      number: '#0421',
-      priceStars: 12000,
-      bgGradient: 'linear-gradient(135deg, #ffb74d 0%, #f06292 100%)',
-      image: 'https://api.iconify.design/fluent-emoji:snowboarder.svg',
-      category: 'auction',
-      seller: 'Whale_99'
-    },
-    {
-      id: '4',
-      name: 'Cyber Hood',
-      number: '#889',
-      priceStars: 1800,
-      bgGradient: 'linear-gradient(135deg, #90a4ae 0%, #37474f 100%)',
-      image: 'https://api.iconify.design/fluent-emoji:ninja.svg',
-      category: 'market',
-      seller: 'Anon'
-    },
-    {
-      id: '5',
-      name: 'Royal Crown',
-      number: '#007',
-      priceStars: 50000,
-      bgGradient: 'linear-gradient(135deg, #ffd54f 0%, #ff8a65 100%)',
-      image: 'https://api.iconify.design/fluent-emoji:crown.svg',
-      category: 'auction',
-      seller: 'King'
-    },
-    {
-      id: '6',
-      name: 'Magic Potion',
-      number: '#512',
-      priceStars: 350,
-      bgGradient: 'linear-gradient(135deg, #64b5f6 0%, #ba68c8 100%)',
-      image: 'https://api.iconify.design/fluent-emoji:potion.svg',
-      category: 'market',
-      seller: 'Trader_X'
-    }
-  ]);
 
   const toggleLike = (id: string) => {
     setLikes(prev => ({ ...prev, [id]: !prev[id] }));
@@ -113,13 +54,13 @@ export default function App() {
     }
 
     if (tg?.openInvoice) {
-      alert(`Запрос на покупку ${item.name} (${item.priceStars} ⭐️)\nКомиссия сервиса 3% учтена.`);
+      alert(`Вы оформляете покупку ${item.name} (${item.priceStars} ⭐️)\nКомиссия сервиса 3% учтена.`);
     } else {
-      alert(`Покупка ${item.name} за ⭐️ ${item.priceStars}. (Запустите в Telegram)`);
+      alert(`Покупка ${item.name} за ⭐️ ${item.priceStars}. (Запустите внутри Telegram)`);
     }
   };
 
-  // Добавление нового товара пользователем
+  // Добавление лота пользователем
   const handleCreateListing = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName || !newPrice) return;
@@ -127,16 +68,17 @@ export default function App() {
     const newItem: GiftItem = {
       id: Date.now().toString(),
       name: newName,
-      number: `#${Math.floor(1000 + Math.random() * 9000)}`,
+      number: newNumber ? `#${newNumber.replace('#', '')}` : `#${Math.floor(1000 + Math.random() * 9000)}`,
       priceStars: parseInt(newPrice),
-      bgGradient: 'linear-gradient(135deg, #64b5f6 0%, #33e0ff 100%)',
+      bgGradient: 'linear-gradient(135deg, #2c2c2e 0%, #1c1c1e 100%)',
       image: 'https://api.iconify.design/fluent-emoji:wrapped-gift.svg',
       category: 'market',
-      seller: 'You'
+      seller: 'Пользователь'
     };
 
     setItems([newItem, ...items]);
     setNewName('');
+    setNewNumber('');
     setNewPrice('');
     setIsModalOpen(false);
   };
@@ -193,10 +135,10 @@ export default function App() {
             background: '#ffc107',
             color: '#000',
             border: 'none',
-            padding: '7px 14px',
+            padding: '8px 16px',
             borderRadius: '12px',
             fontWeight: 700,
-            fontSize: '12px',
+            fontSize: '13px',
             cursor: 'pointer'
           }}
         >
@@ -204,7 +146,7 @@ export default function App() {
         </button>
       </header>
 
-      {/* Панель сборов */}
+      {/* Информационная панель */}
       <div style={{ padding: '12px 16px' }}>
         <div style={{
           background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
@@ -230,26 +172,26 @@ export default function App() {
         </div>
       </div>
 
-      {/* Подразделы */}
+      {/* Быстрые фильтры */}
       <div style={{ display: 'flex', gap: '8px', padding: '0 16px 12px', overflowX: 'auto' }}>
         <button style={{ background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '14px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-          📦 Обзор ›
+          📦 Все лоты
         </button>
         <button style={{ background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '14px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-          ⏱️ Займы под залог ›
+          ⏱️ Займы под залог
         </button>
         <button style={{ background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '14px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-          ⚙️ Фильтр ↕
+          ⚙️ Фильтры
         </button>
       </div>
 
-      {/* Поиск */}
+      {/* Поиск и корзина */}
       <div style={{ padding: '0 16px 16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
         <div style={{ flex: 1, background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span>🔍</span>
           <input 
             type="text" 
-            placeholder="Поиск гифтов и предметов..." 
+            placeholder="Поиск по названию или номеру..." 
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', width: '100%', fontSize: '13px' }}
@@ -260,69 +202,103 @@ export default function App() {
         </div>
       </div>
 
-      {/* Сетка товаров */}
-      <main style={{ padding: '0 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        {filteredItems.map(item => (
-          <div key={item.id} style={{
-            background: item.bgGradient,
-            borderRadius: '20px',
-            padding: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            position: 'relative',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-            minHeight: '210px'
+      {/* Основной контент: Если пусто — показываем заглушку */}
+      <main style={{ padding: '0 16px' }}>
+        {filteredItems.length === 0 ? (
+          <div style={{
+            background: 'rgba(28, 28, 30, 0.6)',
+            border: '1px dashed rgba(255, 255, 255, 0.15)',
+            borderRadius: '24px',
+            padding: '40px 20px',
+            textAlign: 'center',
+            marginTop: '10px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button 
-                onClick={() => toggleLike(item.id)}
-                style={{ background: 'rgba(0,0,0,0.2)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: likes[item.id] ? '#ff3b30' : '#fff' }}
-              >
-                ♥
-              </button>
-              <button 
-                onClick={() => setCartCount(c => c + 1)}
-                style={{ background: 'rgba(0,0,0,0.2)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}
-              >
-                🛒
-              </button>
-            </div>
-
-            <div style={{ textAlign: 'center', margin: '10px 0' }}>
-              <img src={item.image} alt={item.name} style={{ width: '75px', height: '75px', objectFit: 'contain', filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.3))' }} />
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
-                <span style={{ fontWeight: 700, fontSize: '14px', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>{item.name}</span>
-                <span style={{ fontSize: '11px', opacity: 0.8, fontWeight: 600 }}>{item.number}</span>
-              </div>
-              
-              <button 
-                onClick={() => handleBuyWithStars(item)}
-                style={{
-                  width: '100%',
-                  background: '#ffc107',
-                  color: '#000',
-                  border: 'none',
-                  padding: '10px',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(255, 193, 7, 0.4)',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <span>⭐️</span> {item.priceStars.toLocaleString()}
-              </button>
-            </div>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎁</div>
+            <h3 style={{ margin: '0 0 8px', fontSize: '17px', fontWeight: 700 }}>Маркетплейс пуст</h3>
+            <p style={{ color: '#8e8e93', fontSize: '13px', margin: '0 0 20px', lineHeight: '1.4' }}>
+              Будьте первым, кто выставит свой NFT-подарок на продажу!
+            </p>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              style={{
+                background: '#ffc107',
+                color: '#000',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '14px',
+                fontWeight: 800,
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              + Выставить подарок
+            </button>
           </div>
-        ))}
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            {filteredItems.map(item => (
+              <div key={item.id} style={{
+                background: item.bgGradient,
+                borderRadius: '20px',
+                padding: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                minHeight: '210px',
+                border: '1px solid rgba(255,255,255,0.08)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button 
+                    onClick={() => toggleLike(item.id)}
+                    style={{ background: 'rgba(0,0,0,0.3)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: likes[item.id] ? '#ff3b30' : '#fff' }}
+                  >
+                    ♥
+                  </button>
+                  <button 
+                    onClick={() => setCartCount(c => c + 1)}
+                    style={{ background: 'rgba(0,0,0,0.3)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}
+                  >
+                    🛒
+                  </button>
+                </div>
+
+                <div style={{ textAlign: 'center', margin: '10px 0' }}>
+                  <img src={item.image} alt={item.name} style={{ width: '70px', height: '70px', objectFit: 'contain' }} />
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                    <span style={{ fontWeight: 700, fontSize: '14px' }}>{item.name}</span>
+                    <span style={{ fontSize: '11px', opacity: 0.7, fontWeight: 600 }}>{item.number}</span>
+                  </div>
+                  
+                  <button 
+                    onClick={() => handleBuyWithStars(item)}
+                    style={{
+                      width: '100%',
+                      background: '#ffc107',
+                      color: '#000',
+                      border: 'none',
+                      padding: '10px',
+                      borderRadius: '12px',
+                      fontWeight: 800,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>⭐️</span> {item.priceStars.toLocaleString()}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </main>
 
       {/* Модальное окно "Выставить на продажу" */}
@@ -333,15 +309,24 @@ export default function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'
         }}>
           <div style={{ background: '#1c1c1e', width: '100%', maxWidth: '340px', padding: '20px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h3 style={{ margin: '0 0 15px', fontSize: '16px', fontWeight: 700 }}>Продать подарок (P2P)</h3>
+            <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700 }}>Продать NFT-подарок</h3>
+            <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#8e8e93' }}>Укажите параметры вашего лота для P2P-продажи</p>
+            
             <form onSubmit={handleCreateListing}>
               <input 
                 type="text" 
-                placeholder="Название гифта / предмета" 
+                placeholder="Название подарка (например, Red Star)" 
                 value={newName} 
                 onChange={e => setNewName(e.target.value)}
                 required
-                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', marginBottom: '10px', boxSizing: 'border-box', outline: 'none' }}
+                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', marginBottom: '10px', boxSizing: 'border-box', outline: 'none', fontSize: '13px' }}
+              />
+              <input 
+                type="text" 
+                placeholder="Номер подарка (например, 1420)" 
+                value={newNumber} 
+                onChange={e => setNewNumber(e.target.value)}
+                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', marginBottom: '10px', boxSizing: 'border-box', outline: 'none', fontSize: '13px' }}
               />
               <input 
                 type="number" 
@@ -349,7 +334,7 @@ export default function App() {
                 value={newPrice} 
                 onChange={e => setNewPrice(e.target.value)}
                 required
-                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', marginBottom: '15px', boxSizing: 'border-box', outline: 'none' }}
+                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', marginBottom: '16px', boxSizing: 'border-box', outline: 'none', fontSize: '13px' }}
               />
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '12px', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600 }}>Отмена</button>
@@ -360,7 +345,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Нижнее меню */}
+      {/* Нижняя навигация */}
       <nav style={{
         position: 'fixed',
         bottom: 0,
