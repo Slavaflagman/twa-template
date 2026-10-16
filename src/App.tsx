@@ -113,7 +113,6 @@ export default function App() {
     }
 
     if (tg?.openInvoice) {
-      // Когда подключишь серверную инвойс-ссылку: tg.openInvoice(invoiceUrl)
       alert(`Запрос на покупку ${item.name} (${item.priceStars} ⭐️)\nКомиссия сервиса 3% учтена.`);
     } else {
       alert(`Покупка ${item.name} за ⭐️ ${item.priceStars}. (Запустите в Telegram)`);
